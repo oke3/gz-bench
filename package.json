@@ -1,0 +1,33 @@
+{
+  "name": "@oke3/opencode-bench",
+  "version": "0.1.0",
+  "description": "Standardized benchmark harness for AI coding-agent skills. Runs declarative JSON suites in isolated workspaces and scores deterministic filesystem/command assertions. Never calls an LLM.",
+  "type": "module",
+  "bin": {
+    "opencode-bench": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "node --test test/validate.test.ts test/runner.test.ts test/report.test.ts test/cli.test.ts",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.test.json",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "benchmark",
+    "harness",
+    "ai-agents",
+    "coding-agents",
+    "testing"
+  ],
+  "devDependencies": {
+    "@types/node": "^24.3.1",
+    "typescript": "^5.9.2"
+  }
+}
