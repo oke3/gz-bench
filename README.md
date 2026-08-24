@@ -1,10 +1,30 @@
 # opencode-bench
 
+[![CI](https://github.com/oke3/opencode-bench/actions/workflows/ci.yml/badge.svg)](https://github.com/oke3/opencode-bench/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/@oke3/opencode-bench.svg)](https://www.npmjs.com/package/@oke3/opencode-bench)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Node](https://img.shields.io/node/v/@oke3/opencode-bench.svg)](package.json)
+
 A standardized benchmark harness for AI coding-agent skills. You describe test cases in a declarative
 JSON suite; the harness runs each case in an isolated temp workspace using your command template
 (e.g. invoking an agent CLI with the case prompt), then scores deterministic filesystem and command
 assertions. It never calls any LLM or API itself - you bring the agent, opencode-bench brings the
 methodology.
+
+## Contents
+
+- [Why](#why)
+- [Install](#install)
+- [Quick start](#quick-start)
+- [Suite JSON schema](#suite-json-schema)
+- [CLI](#cli)
+- [Check kinds](#check-kinds)
+- [Report format](#report-format)
+- [CI integration](#ci-integration)
+- [Security](#security)
+- [Development](#development)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Why
 
@@ -119,6 +139,43 @@ A case passes when every check passes. A case with zero checks passes vacuously.
 Relative `path` values resolve inside the case workspace. The agent command's exit code is captured
 but not asserted implicitly - assert it yourself via a `command` or `outputMatches` check.
 
+## Report format
+
+With `--json` the harness prints a single machine-readable report:
+
+```json
+{
+  "summary": { "total": 3, "passed": 2, "failed": 1 },
+  "results": [
+    {
+      "id": "write-hello",
+      "passed": true,
+      "durationMs": 1204,
+      "exitCode": 0,
+      "checkResults": [
+        { "kind": "fileExists", "path": "hello.txt", "passed": true }
+      ]
+    }
+  ]
+}
+```
+
+Pipe it to `jq` for gate logic: `opencode-bench run suite.json --cmd "..." --json | jq -e '.summary.failed == 0'`.
+
+## CI integration
+
+The harness is built for pipelines: deterministic checks, per-case timeouts, structured output,
+and distinct exit codes (0 pass / 1 failure / 2 usage error). A minimal GitHub Actions job:
+
+```yaml
+- run: npm install -g @oke3/opencode-bench
+- run: opencode-bench run suite.json --cmd "my-agent --workdir {{dir}} \"{{prompt}}\"" --json > report.json
+- run: node -e "const r=require('./report.json'); process.exit(r.summary.failed ? 1 : 0)"
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the development gate, and this repo's own
+[CI workflow](.github/workflows/ci.yml) which runs typecheck + tests + build on every push.
+
 ## Security
 
 Suites execute arbitrary local commands (setup commands, the rendered `--cmd` template, `command`
@@ -138,3 +195,12 @@ npm run build      # emit dist/ via tsc
 Layout: `src/types.ts` (types + defaults), `src/validate.ts` (loadSuite/validateSuite),
 `src/runner.ts` (runSuite), `src/report.ts` (renderReport/toJSON), `src/cli.ts`.
 Tests live in `test/*.test.ts`, use temp dirs only, and never touch `$HOME`.
+
+## Contributing
+
+PRs welcome - see [CONTRIBUTING.md](CONTRIBUTING.md) for setup, the mandatory gate
+(`typecheck + test + build`), and project guidelines.
+
+## License
+
+[MIT](LICENSE) © oke3
