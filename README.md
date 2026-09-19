@@ -354,6 +354,21 @@ Tests live in `test/*.test.ts`, use temp dirs only, and never touch `$HOME`.
 PRs welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for setup, the mandatory gate
 (`typecheck + test + build`), and project guidelines.
 
+---
+
+## Enterprise Support
+
+Need this customized for your infrastructure? We offer:
+
+- **Integration consulting** — Wire gz-bench into your evaluation pipeline
+- **Custom configuration** — Task-specific rules, models, and workflows for your team
+- **Managed deployment** — We host and maintain your instance
+- **Training workshops** — Hands-on sessions for your engineering team
+
+[Book a 30-min call](https://www.grndxero.com/brief) · [See pricing](https://www.grndxero.com/pricing)
+
+---
+
 ## License
 
 MIT — Ground Zero LLC
