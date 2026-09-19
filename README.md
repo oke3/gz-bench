@@ -1,14 +1,16 @@
-# opencode-bench
+# gz-bench
 
-[![CI](https://github.com/oke3/opencode-bench/actions/workflows/ci.yml/badge.svg)](https://github.com/oke3/opencode-bench/actions/workflows/ci.yml)
-[![npm version](https://img.shields.io/npm/v/@oke3/opencode-bench.svg)](https://www.npmjs.com/package/@oke3/opencode-bench)
+> Built by [Ground Zero LLC](https://github.com/oke3) — AI infrastructure for the agentic age.
+
+[![CI](https://github.com/oke3/gz-bench/actions/workflows/ci.yml/badge.svg)](https://github.com/oke3/gz-bench/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/@ground-zero-llc/gz-bench.svg)](https://www.npmjs.com/package/@ground-zero-llc/gz-bench)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Node](https://img.shields.io/node/v/@oke3/opencode-bench.svg)](package.json)
+[![Node](https://img.shields.io/node/v/@ground-zero-llc/gz-bench.svg)](package.json)
 
 A standardized benchmark harness for AI coding-agent skills. You describe test cases in a declarative
 JSON suite; the harness runs each case in an isolated temp workspace using your command template
 (e.g. invoking an agent CLI with the case prompt), then scores deterministic filesystem and command
-assertions. It never calls any LLM or API itself - you bring the agent, opencode-bench brings the
+assertions. It never calls any LLM or API itself - you bring the agent, gz-bench brings the
 methodology.
 
 ## Contents
@@ -29,7 +31,7 @@ methodology.
 ## Why
 
 Benchmarking coding agents is usually ad hoc: hand-rolled scripts, shared state between runs,
-non-reproducible workspaces, and no structured results. opencode-bench fixes the harness layer:
+non-reproducible workspaces, and no structured results. gz-bench fixes the harness layer:
 
 - **Declarative suites** - cases are plain JSON, reviewable and diffable.
 - **Isolation** - every case runs in its own fresh temp workspace (`os.tmpdir()`), so cases cannot
@@ -42,7 +44,7 @@ non-reproducible workspaces, and no structured results. opencode-bench fixes the
 Requires Node.js >= 18.
 
 ```sh
-npm install -g @oke3/opencode-bench
+npm install -g @ground-zero-llc/gz-bench
 ```
 
 Or run from a checkout:
@@ -54,12 +56,12 @@ npm install && npm run build && node dist/cli.js --help
 ## Quick start
 
 ```sh
-opencode-bench init ./my-bench
+gz-bench init ./my-bench
 cd my-bench
 # sanity check the harness itself:
-opencode-bench run example-suite.json --cmd "echo done"
+gz-bench run example-suite.json --cmd "echo done"
 # then point --cmd at your agent:
-opencode-bench run example-suite.json --cmd "my-agent --workdir {{dir}} \"{{prompt}}\""
+gz-bench run example-suite.json --cmd "my-agent --workdir {{dir}} \"{{prompt}}\""
 ```
 
 The command template is executed with the system shell in the case workspace. Placeholders:
@@ -103,10 +105,10 @@ invalid regex patterns and duplicate case ids all fail with a precise error such
 ## CLI
 
 ```sh
-opencode-bench validate <suite.json>
+gz-bench validate <suite.json>
     Structural validation only. Exit 0 if valid.
 
-opencode-bench run <suite.json> --cmd "<template>" [--timeout n] [--json] [--keep]
+gz-bench run <suite.json> --cmd "<template>" [--timeout n] [--json] [--keep]
     Run all cases. Per case: create temp workspace -> run setup commands
     (first nonzero exit fails the case immediately) -> run the rendered command
     under timeoutSec -> evaluate checks in order -> delete the workspace
@@ -117,7 +119,7 @@ opencode-bench run <suite.json> --cmd "<template>" [--timeout n] [--json] [--kee
     --json     print the JSON report instead of the console table
     --keep     keep workspaces and print their paths for debugging
 
-opencode-bench init [outDir]
+gz-bench init [outDir]
     Write example-suite.json whose demo cases pass with --cmd "echo done".
 
 Exit codes: 0 = all passed, 1 = at least one case failed, 2 = usage/validation error.
@@ -160,7 +162,7 @@ With `--json` the harness prints a single machine-readable report:
 }
 ```
 
-Pipe it to `jq` for gate logic: `opencode-bench run suite.json --cmd "..." --json | jq -e '.summary.failed == 0'`.
+Pipe it to `jq` for gate logic: `gz-bench run suite.json --cmd "..." --json | jq -e '.summary.failed == 0'`.
 
 ## CI integration
 
@@ -168,8 +170,8 @@ The harness is built for pipelines: deterministic checks, per-case timeouts, str
 and distinct exit codes (0 pass / 1 failure / 2 usage error). A minimal GitHub Actions job:
 
 ```yaml
-- run: npm install -g @oke3/opencode-bench
-- run: opencode-bench run suite.json --cmd "my-agent --workdir {{dir}} \"{{prompt}}\"" --json > report.json
+- run: npm install -g @ground-zero-llc/gz-bench
+- run: gz-bench run suite.json --cmd "my-agent --workdir {{dir}} \"{{prompt}}\"" --json > report.json
 - run: node -e "const r=require('./report.json'); process.exit(r.summary.failed ? 1 : 0)"
 ```
 

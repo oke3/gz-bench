@@ -1,10 +1,12 @@
+// Copyright (c) 2026 Ground Zero LLC. All rights reserved.
+
 import { spawn } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import process from "node:process";
 
-export function makeTempDir(prefix = "opencode-bench-test-"): string {
+export function makeTempDir(prefix = "gz-bench-test-"): string {
   return fs.mkdtempSync(path.join(os.tmpdir(), prefix));
 }
 

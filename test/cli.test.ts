@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Ground Zero LLC. All rights reserved.
+
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
@@ -148,7 +150,7 @@ test("run --keep preserves the workspace and reports its location", async () => 
     const keptDir = match[1]?.trim() ?? "";
     try {
       assert.equal(fs.existsSync(keptDir), true);
-      assert.match(path.basename(keptDir), /^opencode-bench-/);
+      assert.match(path.basename(keptDir), /^gz-bench-/);
     } finally {
       fs.rmSync(keptDir, { recursive: true, force: true });
     }

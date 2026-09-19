@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Ground Zero LLC. All rights reserved.
+
 #!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
@@ -7,13 +9,13 @@ import { runSuite } from "./runner.ts";
 import { loadSuite } from "./validate.ts";
 import type { Suite } from "./types.ts";
 
-const USAGE = `opencode-bench - standardized benchmark harness for AI coding-agent skills
+const USAGE = `gz-bench - standardized benchmark harness for AI coding-agent skills
 
 Usage:
-  opencode-bench validate <suite.json>
+  gz-bench validate <suite.json>
       Validate a suite file and print a summary.
 
-  opencode-bench run <suite.json> --cmd "<command template>" [--timeout n] [--json] [--keep]
+  gz-bench run <suite.json> --cmd "<command template>" [--timeout n] [--json] [--keep]
       Run every case in an isolated temp workspace.
       Placeholders in the template:
         {{prompt}}  replaced with the case prompt
@@ -22,7 +24,7 @@ Usage:
       --json        emit a machine-readable JSON report instead of a table
       --keep        keep case workspaces instead of deleting them
 
-  opencode-bench init [outDir]
+  gz-bench init [outDir]
       Write example-suite.json; its demo cases pass with --cmd "echo done".
 
 Exit codes:
@@ -35,7 +37,7 @@ Security: suites execute arbitrary local commands. Only run suites you trust.`;
 const EXAMPLE_SUITE = {
   name: "example-suite",
   description:
-    'Demo suite for opencode-bench. Run it with: opencode-bench run example-suite.json --cmd "echo done"',
+    'Demo suite for gz-bench. Run it with: gz-bench run example-suite.json --cmd "echo done"',
   version: "0.1.0",
   cases: [
     {
@@ -152,7 +154,7 @@ async function cmdInit(parsed: ParsedArgs): Promise<number> {
   fs.mkdirSync(outDir, { recursive: true });
   fs.writeFileSync(target, `${JSON.stringify(EXAMPLE_SUITE, null, 2)}\n`);
   console.log(`wrote ${target}`);
-  console.log(`next: opencode-bench run ${path.join(path.relative(process.cwd(), target) || target)} --cmd "echo done"`);
+  console.log(`next: gz-bench run ${path.join(path.relative(process.cwd(), target) || target)} --cmd "echo done"`);
   return 0;
 }
 
@@ -175,7 +177,7 @@ async function main(argv: string[]): Promise<number> {
     case "init":
       return cmdInit(parsed);
     default:
-      throw new UsageError(`unknown command "${command}". Run "opencode-bench help" for usage.`);
+      throw new UsageError(`unknown command "${command}". Run "gz-bench help" for usage.`);
   }
 }
 

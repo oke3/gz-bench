@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Ground Zero LLC. All rights reserved.
+
 import fs from "node:fs";
 import type { Case, Check, Suite } from "./types.ts";
 

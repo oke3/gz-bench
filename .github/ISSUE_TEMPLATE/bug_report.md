@@ -19,7 +19,7 @@ Attach or paste the minimal suite file that reproduces the issue.
 **Command template**
 
 ```sh
-opencode-bench run suite.json --cmd "..."
+gz-bench run suite.json --cmd "..."
 ```
 
 **Expected behavior**
@@ -31,7 +31,7 @@ Include the full console output (or `--json` report).
 
 - Node version (`node -v`):
 - OS:
-- opencode-bench version:
+- gz-bench version:
 
 **Additional context**
 Anything else that helps reproduce (shell, filesystem quirks, etc).

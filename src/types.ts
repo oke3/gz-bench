@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Ground Zero LLC. All rights reserved.
+
 export const DEFAULT_CASE_TIMEOUT_SEC = 120;
 export const DEFAULT_EXPECT_EXIT = 0;
 

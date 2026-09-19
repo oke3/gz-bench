@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Ground Zero LLC. All rights reserved.
+
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { renderReport, toJSON } from "../src/report.ts";

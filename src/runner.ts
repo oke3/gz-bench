@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Ground Zero LLC. All rights reserved.
+
 import { spawn } from "node:child_process";
 import type { ChildProcess } from "node:child_process";
 import fs from "node:fs";
@@ -6,7 +8,7 @@ import path from "node:path";
 import { DEFAULT_CASE_TIMEOUT_SEC, DEFAULT_EXPECT_EXIT } from "./types.ts";
 import type { Case, CaseResult, Check, CheckResult, RunOptions, Suite } from "./types.ts";
 
-export const WORKSPACE_PREFIX = "opencode-bench-";
+export const WORKSPACE_PREFIX = "gz-bench-";
 
 interface ShellOutcome {
   code: number | null;

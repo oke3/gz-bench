@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Ground Zero LLC. All rights reserved.
+
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";

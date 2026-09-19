@@ -1,10 +1,10 @@
 {
-  "name": "@oke3/opencode-bench",
+  "name": "@ground-zero-llc/gz-bench",
   "version": "0.1.0",
   "description": "Standardized benchmark harness for AI coding-agent skills. Runs declarative JSON suites in isolated workspaces and scores deterministic filesystem/command assertions. Never calls an LLM.",
   "type": "module",
   "bin": {
-    "opencode-bench": "dist/cli.js"
+    "gz-bench": "dist/cli.js"
   },
   "files": [
     "dist",
@@ -20,16 +20,17 @@
     "node": ">=18"
   },
   "license": "MIT",
-  "author": {
+  "author": "Ground Zero LLC <hello@ground-zero.dev>",
+  "publisher": "Ground Zero LLC",
     "name": "oke3"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/oke3/opencode-bench.git"
+    "url": "git+https://github.com/oke3/gz-bench.git"
   },
-  "homepage": "https://github.com/oke3/opencode-bench#readme",
+  "homepage": "https://github.com/oke3/gz-bench#readme",
   "bugs": {
-    "url": "https://github.com/oke3/opencode-bench/issues"
+    "url": "https://github.com/oke3/gz-bench/issues"
   },
   "keywords": [
     "benchmark",

@@ -13,8 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Isolated per-case temp workspaces with teardown (`--keep` to inspect).
 - Five deterministic check kinds: `fileExists`, `fileContains`, `fileNotExists`,
   `command`, `outputMatches`.
-- Strict structural validation with precise error paths (`opencode-bench validate`).
+- Strict structural validation with precise error paths (`gz-bench validate`).
 - Command templating with `{{prompt}}` / `{{dir}}` placeholders.
 - Human-readable report table and machine-readable `--json` output.
-- `opencode-bench init` scaffold with a self-verifying example suite.
+- `gz-bench init` scaffold with a self-verifying example suite.
 - Exit codes: 0 pass, 1 failure, 2 usage/validation error.

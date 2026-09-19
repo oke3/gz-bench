@@ -1,4 +1,4 @@
-# Contributing to opencode-bench
+# Contributing to gz-bench
 
 Thanks for your interest in improving the harness!
 
@@ -8,8 +8,8 @@ Requirements: **Node.js >= 24** (tests use the native `node:test` runner with Ty
 type-stripping — no transpiler step needed for tests) and npm.
 
 ```sh
-git clone https://github.com/oke3/opencode-bench.git
-cd opencode-bench
+git clone https://github.com/oke3/gz-bench.git
+cd gz-bench
 npm install
 npm test
 ```
