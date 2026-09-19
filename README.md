@@ -1,59 +1,45 @@
 # gz-bench
 
-> Built by [Ground Zero LLC](https://github.com/oke3) — AI infrastructure for the agentic age.
-
-[![CI](https://github.com/oke3/gz-bench/actions/workflows/ci.yml/badge.svg)](https://github.com/oke3/gz-bench/actions/workflows/ci.yml)
-[![npm version](https://img.shields.io/npm/v/@ground-zero-llc/gz-bench.svg)](https://www.npmjs.com/package/@ground-zero-llc/gz-bench)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Node](https://img.shields.io/node/v/@ground-zero-llc/gz-bench.svg)](package.json)
+[![Ground Zero LLC](https://img.shields.io/badge/Built%20by-Ground%20Zero%20LLC-purple)](https://github.com/oke3)
+[![npm](https://img.shields.io/npm/v/@ground-zero-llc/gz-bench)](https://www.npmjs.com/package/@ground-zero-llc/gz-bench)
+[![CI](https://github.com/oke3/gz-bench/actions/workflows/ci.yml/badge.svg)](https://github.com/oke3/gz-bench/actions)
 
-A standardized benchmark harness for AI coding-agent skills. You describe test cases in a declarative
-JSON suite; the harness runs each case in an isolated temp workspace using your command template
-(e.g. invoking an agent CLI with the case prompt), then scores deterministic filesystem and command
-assertions. It never calls any LLM or API itself - you bring the agent, gz-bench brings the
-methodology.
+**Your agent says it works. Prove it.**
 
-## Contents
+A standardized benchmark harness for AI coding-agent skills. You describe test cases in a declarative JSON suite; the harness runs each case in an isolated temp workspace using your command template, then scores deterministic filesystem and command assertions. It never calls any LLM or API itself — you bring the agent, `gz-bench` brings the methodology.
+
+---
+
+## Table of Contents
 
 - [Why](#why)
+- [Quick Start](#quick-start)
 - [Install](#install)
-- [Quick start](#quick-start)
-- [Suite JSON schema](#suite-json-schema)
-- [CLI](#cli)
-- [Check kinds](#check-kinds)
-- [Report format](#report-format)
-- [CI integration](#ci-integration)
+- [Architecture](#architecture)
+- [Suite Format](#suite-format)
+- [Check Kinds](#check-kinds)
+- [Writing Good Assertions](#writing-good-assertions)
+- [CLI Reference](#cli-reference)
+- [Report Format](#report-format)
+- [Feature Highlights](#feature-highlights)
+- [CI Integration](#ci-integration)
 - [Security](#security)
 - [Development](#development)
+- [Related Projects](#related-projects)
 - [Contributing](#contributing)
 - [License](#license)
 
 ## Why
 
-Benchmarking coding agents is usually ad hoc: hand-rolled scripts, shared state between runs,
-non-reproducible workspaces, and no structured results. gz-bench fixes the harness layer:
+Benchmarking coding agents is usually ad hoc: hand-rolled scripts, shared state between runs, non-reproducible workspaces, and no structured results. `gz-bench` fixes the harness layer:
 
-- **Declarative suites** - cases are plain JSON, reviewable and diffable.
-- **Isolation** - every case runs in its own fresh temp workspace (`os.tmpdir()`), so cases cannot
-  interfere with each other or with your machine.
-- **Deterministic scoring** - checks are pure filesystem/command assertions, not LLM judgments.
-- **Structured output** - human table or machine-readable `--json` report for CI pipelines.
+- **Declarative suites** — cases are plain JSON, reviewable and diffable.
+- **Isolation** — every case runs in its own fresh temp workspace (`os.tmpdir()`), so cases cannot interfere with each other or with your machine.
+- **Deterministic scoring** — checks are pure filesystem/command assertions, not LLM judgments.
+- **Structured output** — human table or machine-readable `--json` report for CI pipelines.
 
-## Install
-
-Requires Node.js >= 18.
-
-```sh
-npm install -g @ground-zero-llc/gz-bench
-```
-
-Or run from a checkout:
-
-```sh
-npm install && npm run build && node dist/cli.js --help
-```
-
-## Quick start
+## Quick Start
 
 ```sh
 gz-bench init ./my-bench
@@ -71,7 +57,67 @@ The command template is executed with the system shell in the case workspace. Pl
 | `{{prompt}}` | the case prompt (all occurrences) |
 | `{{dir}}`    | absolute path of the case workspace |
 
-## Suite JSON schema
+## Install
+
+Requires Node.js >= 18.
+
+```sh
+npm install -g @ground-zero-llc/gz-bench
+```
+
+Or run from a checkout:
+
+```sh
+npm install && npm run build && node dist/cli.js --help
+```
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    gz-bench CLI                         │
+│                                                         │
+│  ┌──────────┐   ┌───────────┐   ┌───────────────────┐  │
+│  │  init    │   │ validate  │   │      run          │  │
+│  │ scaffold │   │  suite    │   │  cases + score    │  │
+│  └──────────┘   └─────┬─────┘   └────────┬──────────┘  │
+│                       │                   │              │
+└───────────────────────┼───────────────────┼──────────────┘
+                        │                   │
+               ┌────────▼────────┐  ┌───────▼───────────┐
+               │  validate.ts    │  │    runner.ts       │
+               │  loadSuite()    │  │    runCase()       │
+               │  validateSuite()│  │    runSuite()      │
+               └─────────────────┘  │    renderTemplate()│
+                                    │    evalCheck()     │
+                                    └───────┬───────────┘
+                                            │
+                              ┌─────────────▼─────────────┐
+                              │     Per-Case Execution     │
+                              │                           │
+                              │  1. mkdtemp (isolated)    │
+                              │  2. run setup commands    │
+                              │  3. render & run --cmd    │
+                              │  4. evaluate checks       │
+                              │  5. cleanup (or --keep)   │
+                              └───────────────────────────┘
+                                            │
+                              ┌─────────────▼─────────────┐
+                              │      report.ts            │
+                              │  renderReport (table)     │
+                              │  toJSON (machine)         │
+                              └───────────────────────────┘
+```
+
+**Validation** (`validate.ts`): loads a JSON suite file, rejects unknown keys, validates types, checks regex patterns, detects duplicate case ids. Returns a typed `Suite` object.
+
+**Runner** (`runner.ts`): creates an isolated temp directory per case, runs setup commands, renders and executes the agent template, captures stdout/stderr, evaluates checks in order, cleans up.
+
+**Reporting** (`report.ts`): renders a human-readable table or a machine-readable JSON report with `summary` and per-case `checkResults`.
+
+## Suite Format
+
+A suite is a JSON file describing what to test. Here's the full schema with every field:
 
 ```jsonc
 {
@@ -98,11 +144,94 @@ The command template is executed with the system shell in the case workspace. Pl
 }
 ```
 
-Validation is strict: unknown keys, wrong types, empty strings where content is required,
-invalid regex patterns and duplicate case ids all fail with a precise error such as
-`invalid suite at cases[0].checks[2].pattern: invalid regular expression /(/`.
+Validation is strict: unknown keys, wrong types, empty strings where content is required, invalid regex patterns and duplicate case ids all fail with a precise error such as:
 
-## CLI
+```
+invalid suite at cases[0].checks[2].pattern: invalid regular expression /(/
+```
+
+### Suite fields
+
+| Field | Type | Required | Notes |
+|-------|------|----------|-------|
+| `name` | `string` | yes | Non-empty, identifies the suite |
+| `description` | `string` | no | Human-readable description |
+| `version` | `string` | no | Semver string for tracking |
+| `cases` | `Case[]` | yes | Array of test cases |
+
+### Case fields
+
+| Field | Type | Required | Notes |
+|-------|------|----------|-------|
+| `id` | `string` | yes | Unique within the suite |
+| `prompt` | `string` | yes | The prompt sent to the agent (via `{{prompt}}` placeholder) |
+| `setup` | `string[]` | no | Shell commands run before the agent; first nonzero exit fails the case |
+| `checks` | `Check[]` | yes | Assertions evaluated after the agent command |
+| `timeoutSec` | `number` | no | Per-case timeout in seconds (default: 120) |
+
+## Check Kinds
+
+Checks are evaluated in order against the workspace after the agent command finishes.
+A case passes when every check passes. A case with zero checks passes vacuously.
+
+| Kind            | Fields                        | Passes when                                                        |
+| --------------- | ----------------------------- | ------------------------------------------------------------------ |
+| `fileExists`    | `path`                        | path exists inside the workspace                                    |
+| `fileContains`  | `path`, `text`, `flags?`      | file exists and contains `text`; `flags: "i"` = case-insensitive    |
+| `fileNotExists` | `path`                        | path does not exist inside the workspace                            |
+| `command`       | `run`, `expectExit?`          | shell command run in the workspace exits with `expectExit` (def. 0) |
+| `outputMatches` | `pattern`, `flags?`           | regex matches combined stdout+stderr of the agent command           |
+
+Relative `path` values resolve inside the case workspace. The agent command's exit code is captured but not asserted implicitly — assert it yourself via a `command` or `outputMatches` check.
+
+## Writing Good Assertions
+
+Effective benchmarks are built on precise, testable assertions. Here are patterns and anti-patterns:
+
+### ✅ Good patterns
+
+```jsonc
+// 1. Assert specific file content, not just existence
+{ "kind": "fileContains", "path": "src/index.ts", "text": "export function" }
+
+// 2. Use regex for output verification
+{ "kind": "outputMatches", "pattern": "^PASS:\\s+\\d+ tests" }
+
+// 3. Test the actual behavior, not the implementation
+{ "kind": "command", "run": "node dist/cli.js --version", "expectExit": 0 }
+
+// 4. Assert something DOESN'T exist (agent didn't create junk)
+{ "kind": "fileNotExists", "path": ".env.local" }
+
+// 5. Case-insensitive matching for flexible content
+{ "kind": "fileContains", "path": "README.md", "text": "install", "flags": "i" }
+```
+
+### ❌ Anti-patterns
+
+```jsonc
+// 1. Don't just check file exists — what's IN it matters
+{ "kind": "fileExists", "path": "index.js" }  // too vague
+
+// 2. Don't over-specify exact output format
+{ "kind": "outputMatches", "pattern": "^Done\\.$" }  // brittle
+
+// 3. Don't rely on timing or ordering
+{ "kind": "command", "run": "sleep 1 && echo ok" }  // fragile
+
+// 4. Don't forget the happy path
+// If you only assert fileExists, the agent might create an empty file
+```
+
+### Tips
+
+- **Order checks from most important to least** — the harness stops evaluating on first failure.
+- **Use `command` checks for runtime behavior** — `node file.js`, `python script.py`, `go test ./...`.
+- **Use `outputMatches` for log verification** — the agent's combined stdout+stderr is matched.
+- **Use `fileContains` over `fileExists`** — existence alone proves little.
+- **Keep prompts specific** — "Create hello.txt containing 'hi'" beats "Write a file".
+
+## CLI Reference
 
 ```sh
 gz-bench validate <suite.json>
@@ -125,23 +254,15 @@ gz-bench init [outDir]
 Exit codes: 0 = all passed, 1 = at least one case failed, 2 = usage/validation error.
 ```
 
-## Check kinds
+### Exit codes
 
-Checks are evaluated in order against the workspace after the agent command finishes.
-A case passes when every check passes. A case with zero checks passes vacuously.
+| Code | Meaning |
+|------|---------|
+| `0` | All cases passed (or `validate`/`init` succeeded) |
+| `1` | One or more cases failed |
+| `2` | Usage or validation error |
 
-| Kind            | Fields                        | Passes when                                                        |
-| --------------- | ----------------------------- | ------------------------------------------------------------------ |
-| `fileExists`    | `path`                        | path exists inside the workspace                                    |
-| `fileContains`  | `path`, `text`, `flags?`      | file exists and contains `text`; `flags: "i"` = case-insensitive    |
-| `fileNotExists` | `path`                        | path does not exist inside the workspace                            |
-| `command`       | `run`, `expectExit?`          | shell command run in the workspace exits with `expectExit` (def. 0) |
-| `outputMatches` | `pattern`, `flags?`           | regex matches combined stdout+stderr of the agent command           |
-
-Relative `path` values resolve inside the case workspace. The agent command's exit code is captured
-but not asserted implicitly - assert it yourself via a `command` or `outputMatches` check.
-
-## Report format
+## Report Format
 
 With `--json` the harness prints a single machine-readable report:
 
@@ -153,7 +274,6 @@ With `--json` the harness prints a single machine-readable report:
       "id": "write-hello",
       "passed": true,
       "durationMs": 1204,
-      "exitCode": 0,
       "checkResults": [
         { "kind": "fileExists", "path": "hello.txt", "passed": true }
       ]
@@ -162,9 +282,28 @@ With `--json` the harness prints a single machine-readable report:
 }
 ```
 
-Pipe it to `jq` for gate logic: `gz-bench run suite.json --cmd "..." --json | jq -e '.summary.failed == 0'`.
+The default output is a human-readable table:
 
-## CI integration
+```
+id            result  checks  time     first failure
+-----------   ------  ------  -------  ---------------
+write-hello   PASS    1/1     1204ms
+write-world   FAIL    0/1     892ms    file does not exist: world.txt
+echo-test     PASS    1/1     203ms
+```
+
+Pipe to `jq` for gate logic: `gz-bench run suite.json --cmd "..." --json | jq -e '.summary.failed == 0'`.
+
+## Feature Highlights
+
+- **Zero runtime dependencies** — Node built-ins only. Nothing to audit, nothing to break.
+- **Strict JSON validation** — rejects unknown keys, wrong types, invalid regex, duplicate ids.
+- **Full isolation** — each case runs in its own `os.tmpdir()` workspace. Cases cannot interfere.
+- **Deterministic scoring** — no LLM calls, no randomness. Same input → same output.
+- **Structured reports** — machine-readable JSON for CI pipelines, human-readable table for local use.
+- **Cross-platform** — Linux, macOS, Windows (with `taskkill` process cleanup).
+
+## CI Integration
 
 The harness is built for pipelines: deterministic checks, per-case timeouts, structured output,
 and distinct exit codes (0 pass / 1 failure / 2 usage error). A minimal GitHub Actions job:
@@ -180,8 +319,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the development gate, and this repo's
 
 ## Security
 
-Suites execute arbitrary local commands (setup commands, the rendered `--cmd` template, `command`
-checks) with your user privileges, in a shell. There is no sandboxing. Only run suites you trust;
+Suites execute arbitrary local commands (setup commands, the rendered `--cmd` template, `command` checks) with your user privileges, in a shell. There is no sandboxing. Only run suites you trust;
 treat untrusted suite files like untrusted shell scripts. Workspaces are deleted after each case
 unless `--keep` is set.
 
@@ -198,11 +336,28 @@ Layout: `src/types.ts` (types + defaults), `src/validate.ts` (loadSuite/validate
 `src/runner.ts` (runSuite), `src/report.ts` (renderReport/toJSON), `src/cli.ts`.
 Tests live in `test/*.test.ts`, use temp dirs only, and never touch `$HOME`.
 
+## Related Projects
+
+| Project | What It Does |
+|---------|-------------|
+| [gz-sessions](https://github.com/oke3/gz-sessions) | Persistent cross-session memory for AI agents |
+| [gz-sessionrecall](https://github.com/oke3/gz-sessionrecall) | AI code archaeology — search your session history |
+| [gz-codemap](https://github.com/oke3/gz-codemap) | Scan codebases → auto-generate project config |
+| [gz-modelrouter](https://github.com/oke3/gz-modelrouter) | Intelligent LLM cost router — save 40-70% on bills |
+| [gz-bench](https://github.com/oke3/gz-bench) | Standardized benchmark harness for AI coding agents |
+| [gz-authmesh](https://github.com/oke3/gz-authmesh) | Unified credential mesh for AI providers |
+| [gz-remote](https://github.com/oke3/gz-remote) | Drive AI coding agents on remote machines over SSH |
+| [gz-context-engine](https://github.com/oke3/gz-context-engine) | Production-grade RAG context engine |
+
 ## Contributing
 
-PRs welcome - see [CONTRIBUTING.md](CONTRIBUTING.md) for setup, the mandatory gate
+PRs welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for setup, the mandatory gate
 (`typecheck + test + build`), and project guidelines.
 
 ## License
 
-[MIT](LICENSE) © oke3
+MIT — Ground Zero LLC
+
+---
+
+Built by [Ground Zero LLC](https://github.com/oke3) — AI infrastructure for the agentic age.
