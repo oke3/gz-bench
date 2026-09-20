@@ -344,6 +344,7 @@ Tests live in `test/*.test.ts`, use temp dirs only, and never touch `$HOME`.
 | [gz-sessionrecall](https://github.com/oke3/gz-sessionrecall) | AI code archaeology — search your session history |
 | [gz-codemap](https://github.com/oke3/gz-codemap) | Scan codebases → auto-generate project config |
 | [gz-modelrouter](https://github.com/oke3/gz-modelrouter) | Intelligent LLM cost router — save 40-70% on bills |
+| [gz-gateway](https://github.com/oke3/gz-gateway) | OpenAI-compatible AI gateway — rate limiting, caching, failover, cost tracking |
 | [gz-bench](https://github.com/oke3/gz-bench) | Standardized benchmark harness for AI coding agents |
 | [gz-authmesh](https://github.com/oke3/gz-authmesh) | Unified credential mesh for AI providers |
 | [gz-remote](https://github.com/oke3/gz-remote) | Drive AI coding agents on remote machines over SSH |
