@@ -5,7 +5,7 @@
 [![npm](https://img.shields.io/npm/v/@ground-zero-llc/gz-bench)](https://www.npmjs.com/package/@ground-zero-llc/gz-bench)
 [![CI](https://github.com/oke3/gz-bench/actions/workflows/ci.yml/badge.svg)](https://github.com/oke3/gz-bench/actions)
 
-**Your agent says it works. Prove it.**
+> Your agent says it works. Prove it.
 
 A standardized benchmark harness for AI coding-agent skills. You describe test cases in a declarative JSON suite; the harness runs each case in an isolated temp workspace using your command template, then scores deterministic filesystem and command assertions. It never calls any LLM or API itself — you bring the agent, `gz-bench` brings the methodology.
 
